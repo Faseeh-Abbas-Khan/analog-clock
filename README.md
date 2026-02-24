@@ -10,7 +10,6 @@ Zero Third-Party Clock Libraries: Since the assignment specifically forbade usin
 
 
 Responsive & Adaptive Layout: To ensure the clock resizes correctly across different devices and handles orientation changes gracefully, I relied on useWindowDimensions(). By calculating the clock's diameter against the smaller value between the screen's width and the available height, it always stays perfectly circular and avoids getting cut off in landscape mode.
-+1
 
 Handling Time Math (Intl.DateTimeFormat): Rather than trying to manually add or subtract raw GMT offset seconds (which usually breaks as soon as you factor in complex Daylight Saving Time rules), I decided to leverage JavaScript's native Intl.DateTimeFormat API. It safely and accurately extracts the exact local time for any given IANA time zone string.
 
@@ -19,7 +18,6 @@ To fulfill the offline constraints, I went with react-native-sqlite-storage.
 
 
 Time Zone List Caching: On the first successful launch, the app pulls the list of time zones from the TimeZoneDB API and runs a batch insert into a local SQLite TimeZones table. Every time you open the app after that, it instantly loads the list from SQLite, bypassing the network entirely. If the database ever gets deleted or corrupted, the app catches the error, safely falls back to the API, and repopulates the local DB.
-+3
 
 
 Persisting User Preferences: To remember the user's last selected time zone, I created a simple UserPreferences key-value table inside the same SQLite database. When the app boots up, it queries this table right away so the clock immediately jumps to their preferred time zone.
