@@ -14,7 +14,6 @@ const useHome = () => {
             const db = await getDBConnection();
             await createTables(db);
             const savedZone = await getUserSelectedZone(db);
-            console.log("🚀 ~ useHome ~ savedZone:", savedZone);
             
             if (savedZone && savedZone.id) {
                 setTimeZone(savedZone.id);
