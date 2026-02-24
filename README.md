@@ -1,7 +1,6 @@
 # React Native Analog Clock & Time Zone App
 ## Overview
 This is a React Native app I built that displays a custom analog clock. It lets users check their local time and seamlessly switch between different global time zones using data fetched from a public API. I also set it up with an offline-first approach, using a local SQLite database to cache data so the app stays perfectly usable even if the device loses its internet connection.
-+2
 
 ## Architecture Decisions
 Keeping Components Clean (Custom Hooks): I wanted to keep the UI components as pure and readable as possible. To do this, I pulled the heavy lifting—like data fetching, DB initialization, and clock math—out into custom React Hooks (useHome, useTimezone, useAnalogClock).
