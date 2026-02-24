@@ -28,4 +28,4 @@ Battery Life vs. Real-Time Ticking: The requirements state the clock must update
 
 JS Engine Compatibility: My time calculation approach assumes that the underlying JavaScript engine (like Hermes, which is standard in modern React Native) has the full internationalization (i18n) timezone dictionary enabled.
 
-Large List Performance: The time zone API returns hundreds of cities. Rendering a list that massive can cause memory bloat and make the search input feel laggy. To counter this, I swapped out the standard FlatList for @legendapp/list to heavily optimize the rendering batches and keep the dropdown UI buttery smooth.
+Large List Performance: The time zone API returns hundreds of cities. Rendering a list that massive can cause memory bloat and make the search input feel laggy. To counter this, I swapped out the standard FlatList for @legendapp/list to heavily optimize the rendering batches and keep the list UI buttery smooth.
