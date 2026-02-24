@@ -1,97 +1,31 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# React Native Analog Clock & Time Zone App
+## Overview
+This is a React Native app I built that displays a custom analog clock. It lets users check their local time and seamlessly switch between different global time zones using data fetched from a public API. I also set it up with an offline-first approach, using a local SQLite database to cache data so the app stays perfectly usable even if the device loses its internet connection.
 
-# Getting Started
+## Architecture Decisions
+Keeping Components Clean (Custom Hooks): I wanted to keep the UI components as pure and readable as possible. To do this, I pulled the heavy lifting—like data fetching, DB initialization, and clock math—out into custom React Hooks (useHome, useTimezone, useAnalogClock).
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
-## Step 1: Start Metro
+Zero Third-Party Clock Libraries: Since the assignment specifically forbade using prebuilt analog clock components, I built the clock face and hands completely from scratch using core React Native View components. To make the hands tick, I calculated the exact degrees for the hours, minutes, and seconds, and mapped those to CSS transform properties.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Responsive & Adaptive Layout: To ensure the clock resizes correctly across different devices and handles orientation changes gracefully, I relied on useWindowDimensions(). By calculating the clock's diameter against the smaller value between the screen's width and the available height, it always stays perfectly circular and avoids getting cut off in landscape mode.
 
-```sh
-# Using npm
-npm start
+Handling Time Math (Intl.DateTimeFormat): Rather than trying to manually add or subtract raw GMT offset seconds (which usually breaks as soon as you factor in complex Daylight Saving Time rules), I decided to leverage JavaScript's native Intl.DateTimeFormat API. It safely and accurately extracts the exact local time for any given IANA time zone string.
 
-# OR using Yarn
-yarn start
-```
+Offline Caching Approach
+To fulfill the offline constraints, I went with react-native-sqlite-storage.
 
-## Step 2: Build and run your app
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Time Zone List Caching: On the first successful launch, the app pulls the list of time zones from the TimeZoneDB API and runs a batch insert into a local SQLite TimeZones table. Every time you open the app after that, it instantly loads the list from SQLite, bypassing the network entirely. If the database ever gets deleted or corrupted, the app catches the error, safely falls back to the API, and repopulates the local DB.
 
-### Android
 
-```sh
-# Using npm
-npm run android
+Persisting User Preferences: To remember the user's last selected time zone, I created a simple UserPreferences key-value table inside the same SQLite database. When the app boots up, it queries this table right away so the clock immediately jumps to their preferred time zone.
 
-# OR using Yarn
-yarn android
-```
+## Assumptions & Trade-offs
 
-### iOS
+Battery Life vs. Real-Time Ticking: The requirements state the clock must update in real time. To achieve this, I used a setInterval hook firing every 1000 milliseconds. While this makes the second hand sweep smoothly, having continuous state updates running in the background carries a slight trade-off in battery consumption compared to a static UI.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+JS Engine Compatibility: My time calculation approach assumes that the underlying JavaScript engine (like Hermes, which is standard in modern React Native) has the full internationalization (i18n) timezone dictionary enabled.
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Large List Performance: The time zone API returns hundreds of cities. Rendering a list that massive can cause memory bloat and make the search input feel laggy. To counter this, I swapped out the standard FlatList for @legendapp/list to heavily optimize the rendering batches and keep the dropdown UI buttery smooth.
